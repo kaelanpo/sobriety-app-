@@ -1,21 +1,37 @@
-//
-//  ContentView.swift
-//  Test Cursor
-//
-//  Created by MacBook on 9/19/25.
-//
-
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var sobrietyStore = SobrietyStore()
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            SobrietyDashboard()
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+            
+            MoodTrackingView()
+                .tabItem {
+                    Label("Mood", systemImage: "heart.fill")
+                }
+            
+            HabitTrackingView()
+                .tabItem {
+                    Label("Goals", systemImage: "target")
+                }
+            
+            GamificationView()
+                .tabItem {
+                    Label("Analysis", systemImage: "chart.bar.fill")
+                }
+            
+            SettingsView()
+                .tabItem {
+                    Label("More", systemImage: "ellipsis.circle.fill")
+                }
         }
-        .padding()
+        .environmentObject(sobrietyStore)
+        .tint(DS.ColorToken.tint)
     }
 }
 
