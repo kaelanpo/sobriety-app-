@@ -3,46 +3,99 @@ import SwiftUI
 struct SobrietyDashboard: View {
     @EnvironmentObject var store: SobrietyStore
     @State private var showingRelapseConfirmation = false
+    @State private var shimmerOffset: CGFloat = -200
+    @Binding var selectedTab: Int
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: DS.Spacing.lg) {
-                header
-                
-                daysCleanCard
-                
-                nextMilestoneCard
-                
-                needHelpButton
-                
-                yourStatsSection
+        ZStack {
+            ScrollView {
+                VStack(spacing: DS.Spacing.lg) {
+                    header
+                    
+                    daysCleanCard
+                    
+                    nextMilestoneCard
+                    
+                    needHelpButton
+                    
+                    yourStatsSection
+                }
+                .padding(.horizontal, DS.Spacing.lg)
+                .padding(.bottom, DS.Spacing.xl)
             }
-            .padding(.horizontal, DS.Spacing.lg)
-            .padding(.bottom, DS.Spacing.xl)
-        }
-        .background(DS.ColorToken.creamBG.ignoresSafeArea(.all))
+            .background(DS.ColorToken.creamBG.ignoresSafeArea(.all))
 #if !os(macOS)
-        .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.inline)
 #endif
-        .confirmationDialog(
-            "Mark Relapse",
-            isPresented: $showingRelapseConfirmation,
-            titleVisibility: .visible
-        ) {
-            Button("Yes, I relapsed", role: .destructive) {
-                store.markRelapse()
+            .confirmationDialog(
+                "Mark Relapse",
+                isPresented: $showingRelapseConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Yes, I relapsed", role: .destructive) {
+                    store.markRelapse()
+                }
+                Button("Cancel", role: .cancel) { }
+            } message: {
+                Text("This will reset your current streak to 0. Remember, recovery is a journey and setbacks are part of the process.")
             }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("This will reset your current streak to 0. Remember, recovery is a journey and setbacks are part of the process.")
+            
+            // Floating Action Button
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        selectedTab = 1 // Navigate to goals tab
+                    }) {
+                        Image(systemName: "target")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(.white)
+                            .frame(width: 56, height: 56)
+                            .background(DS.ColorToken.tint)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
+                    }
+                    .padding(.trailing, DS.Spacing.lg)
+                    .padding(.bottom, DS.Spacing.xl)
+                }
+            }
         }
     }
     
     private var header: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            Text("Sobriety Journey")
+            Text("Sober")
                 .font(DS.FontToken.rounded(32, .bold))
-                .foregroundStyle(DS.ColorToken.textPrimary)
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [.black, .gray.opacity(0.8)],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .overlay(
+                    // Shimmer effect
+                    Rectangle()
+                        .fill(
+                            LinearGradient(
+                                colors: [.clear, .white.opacity(0.6), .clear],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .rotationEffect(.degrees(30))
+                        .offset(x: shimmerOffset)
+                        .mask(
+                            Text("Sober")
+                                .font(DS.FontToken.rounded(32, .bold))
+                        )
+                )
+                .onAppear {
+                    withAnimation(.linear(duration: 2.0).repeatForever(autoreverses: false)) {
+                        shimmerOffset = 200
+                    }
+                }
             
             Text("You've got this. One day at a time.")
                 .font(DS.FontToken.rounded(16))

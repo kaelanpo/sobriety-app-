@@ -10,7 +10,6 @@ final class SobrietyStore: ObservableObject {
     @Published var startDate: Date = Date()
     @Published var lastRelapseDate: Date? = nil
     @Published var milestones: [Milestone] = []
-    @Published var moodEntries: [MoodEntry] = []
     @Published var motivationalQuotes: [String] = [
         "Every day is a new beginning.",
         "You are stronger than you think.",
@@ -29,7 +28,6 @@ final class SobrietyStore: ObservableObject {
     private let startDateKey = "start_date"
     private let lastRelapseKey = "last_relapse"
     private let milestonesKey = "milestones"
-    private let moodEntriesKey = "mood_entries"
     
     init() {
         load()
@@ -100,10 +98,7 @@ final class SobrietyStore: ObservableObject {
         return Double(currentProgress) / Double(totalProgress)
     }
     
-    func addMoodEntry(_ entry: MoodEntry) {
-        moodEntries.insert(entry, at: 0)
-        save()
-    }
+    
     
     private func save() {
         UserDefaults.standard.set(currentStreak, forKey: streakKey)
@@ -115,9 +110,6 @@ final class SobrietyStore: ObservableObject {
             UserDefaults.standard.set(milestonesData, forKey: milestonesKey)
         }
         
-        if let moodData = try? JSONEncoder().encode(moodEntries) {
-            UserDefaults.standard.set(moodData, forKey: moodEntriesKey)
-        }
     }
     
     private func load() {
@@ -131,9 +123,5 @@ final class SobrietyStore: ObservableObject {
             milestones = decoded
         }
         
-        if let moodData = UserDefaults.standard.data(forKey: moodEntriesKey),
-           let decoded = try? JSONDecoder().decode([MoodEntry].self, from: moodData) {
-            moodEntries = decoded
-        }
     }
 }

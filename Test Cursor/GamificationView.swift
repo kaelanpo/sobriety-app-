@@ -117,8 +117,8 @@ struct GamificationView: View {
             
             LazyVStack(spacing: DS.Spacing.sm) {
                 InsightCard(
-                    title: "Mood Tracking",
-                    description: "\(store.moodEntries.count) entries recorded",
+                    title: "Sobriety Progress",
+                    description: "\(store.currentStreak) days clean",
                     icon: "heart.text.square",
                     color: DS.ColorToken.tint
                 )

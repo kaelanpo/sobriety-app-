@@ -39,7 +39,7 @@ struct SettingsView: View {
             }
             Button("Cancel", role: .cancel) { }
         } message: {
-            Text("This will permanently delete all your data including streaks, milestones, and mood entries. This action cannot be undone.")
+            Text("This will permanently delete all your data including streaks and milestones. This action cannot be undone.")
         }
     }
     
@@ -132,7 +132,6 @@ struct SettingsView: View {
         store.startDate = Date()
         store.lastRelapseDate = nil
         store.milestones = []
-        store.moodEntries = []
     }
 }
 

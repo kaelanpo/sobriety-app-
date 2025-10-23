@@ -97,6 +97,11 @@ struct HabitTrackingView: View {
                     HabitCard(habit: habit) {
                         toggleHabit(habit)
                     }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button("Delete", role: .destructive) {
+                            deleteHabit(habit)
+                        }
+                    }
                 }
             }
         }
@@ -112,6 +117,11 @@ struct HabitTrackingView: View {
                 ForEach(weeklyHabitsList) { habit in
                     HabitCard(habit: habit) {
                         toggleHabit(habit)
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button("Delete", role: .destructive) {
+                            deleteHabit(habit)
+                        }
                     }
                 }
             }
@@ -212,6 +222,10 @@ struct HabitTrackingView: View {
         if let index = habits.firstIndex(where: { $0.id == habit.id }) {
             habits[index].isCompleted.toggle()
         }
+    }
+    
+    private func deleteHabit(_ habit: Habit) {
+        habits.removeAll { $0.id == habit.id }
     }
 }
 
