@@ -72,7 +72,7 @@ struct GamificationView: View {
                                 .foregroundStyle(DS.ColorToken.textSecondary)
                             Text("\(store.currentStreak) days")
                                 .font(.system(size: 24, weight: .bold, design: .rounded))
-                                .foregroundStyle(DS.ColorToken.tint)
+                                .foregroundStyle(DS.ColorToken.purpleGradient)
                         }
                         
                         Spacer()
@@ -100,7 +100,7 @@ struct GamificationView: View {
                             }
                             
                             ProgressView(value: store.progressToNextMilestone)
-                                .tint(DS.ColorToken.tint)
+                                .tint(DS.ColorToken.purpleGradient)
                                 .scaleEffect(x: 1, y: 2, anchor: .center)
                         }
                     }
@@ -120,7 +120,7 @@ struct GamificationView: View {
                     title: "Sobriety Progress",
                     description: "\(store.currentStreak) days clean",
                     icon: "heart.text.square",
-                    color: DS.ColorToken.tint
+                    color: DS.ColorToken.purpleGradient
                 )
                 
                 InsightCard(
@@ -145,7 +145,7 @@ struct GamificationView: View {
             VStack(spacing: DS.Spacing.md) {
                 Image(systemName: "quote.bubble.fill")
                     .font(.system(size: 24))
-                    .foregroundStyle(DS.ColorToken.tint)
+                    .foregroundStyle(DS.ColorToken.purpleGradient)
                 
                 Text(store.motivationalQuotes.randomElement() ?? "You've got this!")
                     .font(DS.FontToken.rounded(16, .medium))
@@ -165,7 +165,7 @@ struct AchievementCard: View {
             VStack(spacing: DS.Spacing.sm) {
                 Image(systemName: milestone.icon)
                     .font(.system(size: 32))
-                    .foregroundStyle(DS.ColorToken.tint)
+                    .foregroundStyle(DS.ColorToken.purpleGradient)
                 
                 Text(milestone.title)
                     .font(DS.FontToken.rounded(14, .semibold))
@@ -187,11 +187,11 @@ struct AchievementCard: View {
     }
 }
 
-struct InsightCard: View {
+struct InsightCard<ColorStyle: ShapeStyle>: View {
     let title: String
     let description: String
     let icon: String
-    let color: Color
+    let color: ColorStyle
     
     var body: some View {
         SoftCard {

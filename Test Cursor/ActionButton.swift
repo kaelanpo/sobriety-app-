@@ -20,7 +20,7 @@ struct ActionButton: View {
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(hex: "#F2F2F7"))
             )
-            .foregroundColor(Color(hex: "#FF6EA9"))
+            .foregroundStyle(DS.ColorToken.purpleGradient)
         }
         .buttonStyle(PlainButtonStyle())
     }

@@ -21,13 +21,13 @@ struct FilterChip: View {
             .padding(.vertical, 8)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(isSelected ? Color(hex: "#FF6EA9").opacity(0.15) : Color(hex: "#F2F2F7"))
+                    .fill(isSelected ? DS.ColorToken.purpleLight.opacity(0.15) : Color(hex: "#F2F2F7"))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
-                    .stroke(isSelected ? Color(hex: "#FF6EA9") : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? AnyShapeStyle(DS.ColorToken.purpleGradient) : AnyShapeStyle(Color.clear), lineWidth: 2)
             )
-            .foregroundColor(isSelected ? Color(hex: "#FF6EA9") : Color(hex: "#1C1C1E"))
+            .foregroundStyle(isSelected ? AnyShapeStyle(DS.ColorToken.purpleGradient) : AnyShapeStyle(Color(hex: "#1C1C1E")))
         }
         .buttonStyle(PlainButtonStyle())
     }

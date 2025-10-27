@@ -7,11 +7,20 @@ public enum DS {
         public static let card = Color.white
         public static let textPrimary = Color(hex: "#1E1E1E")
         public static let textSecondary = Color(hex: "#6B6B6B")
-        public static let tint = Color(hex: "#FF6EA9")      // warm pink
+        public static let tint = Color(hex: "#9B5FFF")      // mid-point purple for fallback
         public static let mint = Color(hex: "#8EE3D0")
         public static let peach = Color(hex: "#FFC6A8")
         public static let shadow = Color.black.opacity(0.08)
         public static let divider = Color.black.opacity(0.06)
+        
+        // Purple gradient colors
+        public static let purpleLight = Color(hex: "#B47AFF")  // light purple
+        public static let purpleDark = Color(hex: "#7B2FFF")   // deep purple
+        public static let purpleGradient = LinearGradient(
+            colors: [purpleLight, purpleDark],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
         
         // Orange sherbet gradient colors
         public static let orangeSherbet = Color(hex: "#FF8C42")  // orange sherbet
@@ -54,6 +63,19 @@ extension Color {
     }
 }
 
+// MARK: - Gradient Extensions
+extension LinearGradient {
+    public static var purpleGradient: LinearGradient {
+        DS.ColorToken.purpleGradient
+    }
+}
+
+extension View {
+    func purpleGradient() -> some View {
+        self.foregroundStyle(DS.ColorToken.purpleGradient)
+    }
+}
+
 struct SoftCard<Content: View>: View {
     let content: Content
     init(@ViewBuilder content: () -> Content) { self.content = content() }
@@ -73,7 +95,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(DS.ColorToken.tint)
+            .background(DS.ColorToken.purpleGradient)
             .cornerRadius(DS.Radius.lg)
             .opacity(configuration.isPressed ? 0.9 : 1)
             .scaleEffect(configuration.isPressed ? 0.98 : 1)

@@ -40,7 +40,7 @@ struct HabitTrackingView: View {
                     Button("Add Goal") {
                         showingAddHabit = true
                     }
-                    .foregroundColor(DS.ColorToken.tint)
+                    .foregroundStyle(DS.ColorToken.purpleGradient)
                 }
             }
         }
@@ -67,7 +67,7 @@ struct HabitTrackingView: View {
         VStack(spacing: DS.Spacing.lg) {
             Image(systemName: "target")
                 .font(.system(size: 60))
-                .foregroundStyle(DS.ColorToken.tint)
+                .foregroundStyle(DS.ColorToken.purpleGradient)
             
             Text("No goals set yet")
                 .font(DS.FontToken.rounded(20, .semibold))
@@ -139,7 +139,7 @@ struct HabitTrackingView: View {
                     VStack {
                         Text("\(completedHabitsCount)")
                             .font(.system(size: 24, weight: .bold, design: .rounded))
-                            .foregroundStyle(DS.ColorToken.tint)
+                            .foregroundStyle(DS.ColorToken.purpleGradient)
                         Text("Completed")
                             .font(DS.FontToken.rounded(12))
                             .foregroundStyle(DS.ColorToken.textSecondary)

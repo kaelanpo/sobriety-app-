@@ -31,7 +31,7 @@ struct ContentView: View {
                 .tag(3)
         }
         .environmentObject(sobrietyStore)
-        .tint(DS.ColorToken.tint)
+        .tint(DS.ColorToken.purpleLight)
     }
 }
 

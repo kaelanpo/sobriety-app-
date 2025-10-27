@@ -52,7 +52,7 @@ struct SobrietyDashboard: View {
                             .font(.system(size: 20, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(width: 56, height: 56)
-                            .background(DS.ColorToken.tint)
+                            .background(DS.ColorToken.purpleGradient)
                             .clipShape(Circle())
                             .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
                     }
@@ -114,7 +114,7 @@ struct SobrietyDashboard: View {
                 
                 Text("\(store.currentStreak)")
                     .font(.system(size: 64, weight: .bold, design: .rounded))
-                    .foregroundStyle(DS.ColorToken.tint)
+                    .foregroundStyle(DS.ColorToken.purpleGradient)
                 
                 if store.currentStreak == 0 {
                     Text("Start your journey today")
@@ -134,7 +134,7 @@ struct SobrietyDashboard: View {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
                 HStack {
                     Image(systemName: "star.fill")
-                        .foregroundStyle(DS.ColorToken.tint)
+                        .foregroundStyle(DS.ColorToken.purpleGradient)
                         .font(.system(size: 16))
                     Text("Next Milestone")
                         .font(DS.FontToken.rounded(18, .semibold))
@@ -149,7 +149,7 @@ struct SobrietyDashboard: View {
                         
                         Text("\(milestone.days) days → \(milestone.title)")
                             .font(DS.FontToken.rounded(16, .semibold))
-                            .foregroundStyle(DS.ColorToken.tint)
+                            .foregroundStyle(DS.ColorToken.purpleGradient)
                         
                         Text(milestone.description)
                             .font(DS.FontToken.rounded(14))
@@ -181,7 +181,7 @@ struct SobrietyDashboard: View {
             }
             .padding(.horizontal, DS.Spacing.lg)
             .padding(.vertical, DS.Spacing.md)
-            .background(DS.ColorToken.tint)
+            .background(DS.ColorToken.purpleGradient)
             .cornerRadius(DS.Radius.lg)
         }
     }
@@ -196,7 +196,7 @@ struct SobrietyDashboard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("\(store.currentStreak)")
                         .font(.system(size: 24, weight: .bold, design: .rounded))
-                        .foregroundStyle(DS.ColorToken.tint)
+                        .foregroundStyle(DS.ColorToken.purpleGradient)
                     Text("Current Streak")
                         .font(DS.FontToken.rounded(12))
                         .foregroundStyle(DS.ColorToken.textSecondary)

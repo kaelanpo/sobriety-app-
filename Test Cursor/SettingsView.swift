@@ -48,7 +48,7 @@ struct SettingsView: View {
             HStack {
                 Image(systemName: "person.circle.fill")
                     .font(.system(size: 50))
-                    .foregroundStyle(DS.ColorToken.tint)
+                    .foregroundStyle(DS.ColorToken.purpleGradient)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Recovery Journey")
@@ -142,7 +142,7 @@ struct ExportDataView: View {
         VStack(spacing: DS.Spacing.lg) {
             Image(systemName: "square.and.arrow.up")
                 .font(.system(size: 60))
-                .foregroundStyle(DS.ColorToken.tint)
+                .foregroundStyle(DS.ColorToken.purpleGradient)
             
             Text("Export Your Data")
                 .font(DS.FontToken.rounded(24, .bold))
@@ -197,7 +197,7 @@ struct CrisisResourcesView: View {
         VStack(spacing: DS.Spacing.md) {
             Image(systemName: "heart.fill")
                 .font(.system(size: 50))
-                .foregroundStyle(DS.ColorToken.tint)
+                .foregroundStyle(DS.ColorToken.purpleGradient)
             
             Text("You're Not Alone")
                 .font(DS.FontToken.rounded(24, .bold))
@@ -258,7 +258,7 @@ struct CrisisResourcesView: View {
                     
                     Text("You are valued and your life matters.")
                         .font(DS.FontToken.rounded(14, .semibold))
-                        .foregroundStyle(DS.ColorToken.tint)
+                        .foregroundStyle(DS.ColorToken.purpleGradient)
                         .padding(.top, DS.Spacing.sm)
                 }
             }
@@ -302,7 +302,7 @@ struct CrisisContactCard: View {
                 
                 Text(number)
                     .font(DS.FontToken.rounded(18, .bold))
-                    .foregroundStyle(DS.ColorToken.tint)
+                    .foregroundStyle(DS.ColorToken.purpleGradient)
                 
                 Text(description)
                     .font(DS.FontToken.rounded(14))
@@ -332,7 +332,7 @@ struct RecoveryResourcesView: View {
         VStack(spacing: DS.Spacing.md) {
             Image(systemName: "book.fill")
                 .font(.system(size: 50))
-                .foregroundStyle(DS.ColorToken.tint)
+                .foregroundStyle(DS.ColorToken.purpleGradient)
             
             Text("Recovery Resources")
                 .font(DS.FontToken.rounded(24, .bold))
@@ -391,7 +391,7 @@ struct ResourceCard: View {
             HStack {
                 Image(systemName: icon)
                     .font(.system(size: 24))
-                    .foregroundStyle(DS.ColorToken.tint)
+                    .foregroundStyle(DS.ColorToken.purpleGradient)
                     .frame(width: 40)
                 
                 VStack(alignment: .leading, spacing: 4) {
