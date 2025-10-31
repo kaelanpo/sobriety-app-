@@ -9,6 +9,7 @@
 /* Begin PBXFileReference section */
 		FA2BA0E42EAFFDEF00D74DF2 /* SobrietyApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SobrietyApp.xcodeproj; sourceTree = "<group>"; };
 		FA34D4472E7DEFD60027CA9E /* Test Cursor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Test Cursor.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA70FF832EB19CDB00E10826 /* SobrietyApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SobrietyApp.xcodeproj; sourceTree = "<group>"; };
 		FA8F68E02EB176510094362F /* SobrietyApp.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = SobrietyApp.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -50,6 +51,13 @@
 			isa = PBXGroup;
 			children = (
 				FA34D4472E7DEFD60027CA9E /* Test Cursor.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FA70FF842EB19CDB00E10826 /* Products */ = {
+			isa = PBXGroup;
+			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -121,6 +129,10 @@
 				{
 					ProductGroup = FA8F68E42EB176510094362F /* Products */;
 					ProjectRef = FA8F68E02EB176510094362F /* SobrietyApp.xcodeproj */;
+				},
+				{
+					ProductGroup = FA70FF842EB19CDB00E10826 /* Products */;
+					ProjectRef = FA70FF832EB19CDB00E10826 /* SobrietyApp.xcodeproj */;
 				},
 			);
 			projectRoot = "";

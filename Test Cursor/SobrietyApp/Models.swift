@@ -131,3 +131,35 @@ extension DateFormatter {
 }
 
 
+import SwiftData
+
+// MARK: - SwiftData Models (guarded for iOS 17+)
+@available(iOS 17.0, *)
+@Model
+final class CheckIn {
+    var id: UUID
+    var date: Date
+    
+    init(id: UUID = .init(), date: Date = .now) {
+        self.id = id
+        self.date = date
+    }
+}
+
+@available(iOS 17.0, *)
+@Model
+final class Goal {
+    var id: UUID
+    var title: String
+    var isDaily: Bool
+    var createdAt: Date
+    
+    init(title: String, isDaily: Bool = true, createdAt: Date = .now) {
+        self.id = .init()
+        self.title = title
+        self.isDaily = isDaily
+        self.createdAt = createdAt
+    }
+}
+
+

@@ -1,6 +1,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import SwiftData
 
 // MARK: - Sobriety Store
 @MainActor
@@ -10,6 +11,7 @@ final class SobrietyStore: ObservableObject {
     @Published var startDate: Date = Date()
     @Published var lastRelapseDate: Date? = nil
     @Published var lastCheckInDate: Date? = nil
+    @Published var checkInDates: [Date] = []
     @Published var milestones: [Milestone] = []
     @Published var motivationalQuotes: [String] = [
         "Every day is a new beginning.",
@@ -30,9 +32,11 @@ final class SobrietyStore: ObservableObject {
     private let lastRelapseKey = "last_relapse"
     private let lastCheckInKey = "last_check_in"
     private let milestonesKey = "milestones"
+    private let checkInDatesKey = "check_in_dates"
     
     init() {
         load()
+        checkInDates = loadCheckInDates()
         checkStreak()
     }
     
@@ -48,56 +52,55 @@ final class SobrietyStore: ObservableObject {
     }
     
     func checkIn() {
-        let today = Date()
-        let calendar = Calendar.current
-        
-        // Check if already checked in today
-        if let lastCheckIn = lastCheckInDate,
-           calendar.isDate(lastCheckIn, inSameDayAs: today) {
-            return // Already checked in today
-        }
-        
-        lastCheckInDate = today
-        
-        // If this is the first check-in or consecutive day, increment streak
-        if currentStreak == 0 || 
-           (lastCheckInDate != nil && 
-            calendar.dateComponents([.day], from: startDate, to: today).day == currentStreak) {
-            currentStreak += 1
-            if currentStreak == 1 {
-                startDate = today
-            }
+        let today = Calendar.current.startOfDay(for: Date())
+        if !checkInDates.contains(where: { Calendar.current.isDate($0, inSameDayAs: today) }) {
+            checkInDates.append(today)
+            saveCheckInDates(checkInDates)
+            lastCheckInDate = today
+            recomputeStreaks(from: checkInDates)
             checkMilestones()
+            save()
         }
-        
-        save()
     }
     
     func checkStreak() {
+        recomputeStreaks(from: checkInDates)
+    }
+
+    // MARK: - Streak computation
+    func computeStreaks(referenceDate: Date, checkIns: [Date]) -> (current: Int, longest: Int) {
         let calendar = Calendar.current
-        let today = Date()
-        
-        // Calculate days between start date and today
-        let daysSinceStart = calendar.dateComponents([.day], from: startDate, to: today).day ?? 0
-        
-        if daysSinceStart == 0 {
-            // Same day, don't change anything
-            return
-        } else if daysSinceStart == 1 {
-            // Consecutive day, increment streak
-            currentStreak += 1
-            startDate = today
-            checkMilestones()
-            save()
-        } else if daysSinceStart > 1 {
-            // Gap detected, reset streak
-            if currentStreak > longestStreak {
-                longestStreak = currentStreak
+        let uniqueDays = Set(checkIns.map { calendar.startOfDay(for: $0) })
+        let sorted = uniqueDays.sorted()
+        var longest = 0
+        var current = 0
+        var previousDay: Date?
+        for day in sorted {
+            if let prev = previousDay, calendar.dateComponents([.day], from: prev, to: day).day == 1 {
+                current += 1
+            } else {
+                current = 1
             }
-            currentStreak = 0
-            startDate = today
-            save()
+            longest = max(longest, current)
+            previousDay = day
         }
+        // Current streak is days ending at the latest day; if the latest day isn't today or yesterday, it may be broken.
+        if let latest = sorted.last {
+            if !calendar.isDate(latest, inSameDayAs: calendar.startOfDay(for: referenceDate)) &&
+               calendar.dateComponents([.day], from: latest, to: referenceDate).day ?? 2 > 1 {
+                // gap > 1 day after last check-in
+                return (0, longest)
+            }
+        }
+        return (current, longest)
+    }
+
+    private func recomputeStreaks(from dates: [Date]) {
+        let result = computeStreaks(referenceDate: Date(), checkIns: dates)
+        currentStreak = result.current
+        longestStreak = max(longestStreak, result.longest)
+        lastCheckInDate = dates.sorted().last
+        if currentStreak == 1 { startDate = lastCheckInDate ?? Date() }
     }
     
     private func checkMilestones() {
@@ -127,8 +130,13 @@ final class SobrietyStore: ObservableObject {
     }
     
     var needsCheckIn: Bool {
-        guard let lastCheckIn = lastCheckInDate else { return true }
-        return !Calendar.current.isDate(lastCheckIn, inSameDayAs: Date())
+        guard let last = checkInDates.sorted().last else { return true }
+        return !Calendar.current.isDate(last, inSameDayAs: Date())
+    }
+    
+    func hasCheckedInOnDate(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        return checkInDates.contains(where: { calendar.isDate($0, inSameDayAs: date) })
     }
     
     
@@ -178,6 +186,9 @@ final class SobrietyStore: ObservableObject {
             } else {
                 milestones = []
             }
+            // Recompute streaks from stored check-in dates if present
+            let dates = loadCheckInDates()
+            recomputeStreaks(from: dates)
         } catch {
             print("Error loading data: \(error.localizedDescription)")
             // Reset to safe defaults
@@ -186,6 +197,19 @@ final class SobrietyStore: ObservableObject {
             startDate = Date()
             lastRelapseDate = nil
             milestones = []
+        }
+    }
+
+    // MARK: - Check-in dates persistence
+    private func loadCheckInDates() -> [Date] {
+        guard let data = UserDefaults.standard.data(forKey: checkInDatesKey),
+              let decoded = try? JSONDecoder().decode([Date].self, from: data) else { return [] }
+        return decoded
+    }
+    
+    private func saveCheckInDates(_ dates: [Date]) {
+        if let data = try? JSONEncoder().encode(dates) {
+            UserDefaults.standard.set(data, forKey: checkInDatesKey)
         }
     }
 }

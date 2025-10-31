@@ -6,36 +6,32 @@ class NotificationManager: ObservableObject {
     
     private init() {}
     
-    func requestPermission() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-            if granted {
-                print("Notification permission granted")
-            } else if let error = error {
-                print("Notification permission error: \(error)")
-            }
+    // MARK: - Simple async wrappers (iOS 16+)
+    static func requestPermissions() async -> Bool {
+        do {
+            return try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+        } catch {
+            return false
         }
     }
     
-    func scheduleDailyCheckIn() {
+    static func scheduleDailyReminder(hour: Int = 9, minute: Int = 0, id: String = "daily-checkin") async {
         let content = UNMutableNotificationContent()
         content.title = "Daily Check-In"
         content.body = "Don't forget to check in and maintain your sobriety streak! 💪"
         content.sound = .default
         content.badge = 1
         
-        // Schedule for 9 AM daily
         var dateComponents = DateComponents()
-        dateComponents.hour = 9
-        dateComponents.minute = 0
-        
+        dateComponents.hour = hour
+        dateComponents.minute = minute
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
-        let request = UNNotificationRequest(identifier: "daily-checkin", content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Error scheduling notification: \(error)")
-            }
-        }
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+        do { try await UNUserNotificationCenter.current().add(request) } catch { }
+    }
+    
+    static func cancelReminder(id: String = "daily-checkin") {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
     }
     
     func scheduleMilestoneReminder() {

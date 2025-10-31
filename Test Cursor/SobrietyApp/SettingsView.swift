@@ -1,9 +1,12 @@
 import SwiftUI
+import UserNotifications
 
 struct SettingsView: View {
     @EnvironmentObject var store: SobrietyStore
     @State private var showingRelapseConfirmation = false
     @State private var showingResetConfirmation = false
+    @State private var notificationsOn: Bool = UserDefaults.standard.bool(forKey: "notifications_enabled")
+    @State private var notificationsError: String? = nil
     
     var body: some View {
         NavigationView {
@@ -103,8 +106,54 @@ struct SettingsView: View {
     
     private var notificationSection: some View {
         Section("Notifications") {
-            Toggle("Daily Check-In Reminders", isOn: .constant(true))
+            Toggle("Daily Check-In Reminders", isOn: $notificationsOn)
+                .onChange(of: notificationsOn) { newValue in
+                    UserDefaults.standard.set(newValue, forKey: "notifications_enabled")
+                    Task {
+                        if newValue {
+                            let granted = await requestNotificationPermissions()
+                            if granted {
+                                await scheduleDailyReminder(hour: 9, minute: 0)
+                                notificationsError = nil
+                            } else {
+                                notificationsOn = false
+                                notificationsError = "Notifications permission denied."
+                            }
+                        } else {
+                            cancelDailyReminder()
+                            notificationsError = nil
+                        }
+                    }
+                }
+            if let error = notificationsError {
+                Text(error)
+                    .font(DS.FontToken.rounded(12))
+                    .foregroundStyle(.red)
+            }
         }
+    }
+    
+    // MARK: - Local notification helpers (kept here since project doesn't yet include shared manager in target)
+    private func requestNotificationPermissions() async -> Bool {
+        do {
+            return try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+        } catch { return false }
+    }
+    
+    private func scheduleDailyReminder(hour: Int, minute: Int, id: String = "daily-checkin") async {
+        let content = UNMutableNotificationContent()
+        content.title = "Daily Check-In"
+        content.body = "Tap to open the app and log today."
+        var comps = DateComponents()
+        comps.hour = hour
+        comps.minute = minute
+        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: true)
+        let req = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+        _ = try? await UNUserNotificationCenter.current().add(req)
+    }
+    
+    private func cancelDailyReminder(id: String = "daily-checkin") {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
     }
     
     private var aboutSection: some View {
