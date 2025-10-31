@@ -82,25 +82,44 @@ struct SobrietyLiveActivity: Widget {
 // This widget can be added to an existing Widget Extension target if needed
 #endif
 
-// MARK: - Compact Streak Visualization
-struct CompactStreakView: View {
+// MARK: - Unified Daily Action Hub
+struct DailyActionHub: View {
     @EnvironmentObject var store: SobrietyStore
-    @State private var isExpanded = false
+    @Binding var isCalendarExpanded: Bool
     @State private var currentCalendarDate = Date()
+    @State private var isPressed = false
     
     private let calendar = Calendar.current
     private let maxVisibleChainLinks = 7
     
+    private var hasCheckedInToday: Bool {
+        guard let lastCheckIn = store.lastCheckInDate else { return false }
+        return Calendar.current.isDate(lastCheckIn, inSameDayAs: Date())
+    }
+    
+    private var daysToNextMilestone: Int {
+        guard let milestone = store.currentMilestone else { return 0 }
+        return milestone.days - store.currentStreak
+    }
+    
+    private var milestoneTitle: String {
+        store.currentMilestone?.title ?? "Milestone"
+    }
+    
+    private var milestoneDescription: String {
+        store.currentMilestone?.description ?? "Keep going!"
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Compact view - horizontal chain/arc
+            // Zone 1: Streak & Calendar Trigger (Top)
             Button(action: {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                    isExpanded.toggle()
+                    isCalendarExpanded.toggle()
                 }
             }) {
                 HStack(spacing: DS.Spacing.md) {
-                    // Chain/Arc visualization
+                    // Chain visualization
                     HStack(spacing: 4) {
                         ForEach(0..<min(store.currentStreak, maxVisibleChainLinks), id: \.self) { index in
                             Circle()
@@ -128,49 +147,211 @@ struct CompactStreakView: View {
                         Text("\(store.currentStreak) Day\(store.currentStreak == 1 ? "" : "s") Strong")
                             .font(DS.FontToken.rounded(17, .bold))
                             .foregroundStyle(DS.ColorToken.textPrimary)
-                        Text("Tap to view calendar")
+                        Text("View Calendar")
                             .font(DS.FontToken.rounded(11))
                             .foregroundStyle(DS.ColorToken.textSecondary)
                     }
-                    
-                    Spacer()
-                    
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                
+                Spacer()
+                
+                    Image(systemName: isCalendarExpanded ? "chevron.up" : "chevron.down")
                         .font(.system(size: 14, weight: .semibold))
                         .foregroundStyle(DS.ColorToken.purpleLight)
                 }
                 .padding(DS.Spacing.md)
-                .background(
-                    RoundedRectangle(cornerRadius: DS.Radius.lg)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: DS.ColorToken.shadow, radius: 6, x: 0, y: 3)
-                )
             }
             .buttonStyle(PlainButtonStyle())
-            .accessibilityLabel("Streak: \(store.currentStreak) days. Tap to expand calendar")
+            .accessibilityLabel("Streak: \(store.currentStreak) days. Tap to \(isCalendarExpanded ? "collapse" : "expand") calendar")
             
-            // Expanded mini-calendar
-            if isExpanded {
-                MiniCalendarView(
-                    currentDate: $currentCalendarDate,
-                    isExpanded: $isExpanded
-                )
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .top)),
-                    removal: .opacity.combined(with: .move(edge: .top))
-                ))
-                .zIndex(1)
+            // Visual separator
+            Divider()
+                .padding(.horizontal, DS.Spacing.md)
+                .background(DS.ColorToken.divider)
+            
+            // Zone 2: Daily Check-In (Main Body) - Most prominent
+            Button(action: {
+                if !hasCheckedInToday {
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                    generator.impactOccurred()
+                    store.checkIn()
+                    
+                    #if canImport(ActivityKit)
+                    if #available(iOS 18.0, *) {
+                        updateLiveActivity()
+                    }
+                    #endif
+                }
+            }) {
+                HStack(alignment: .center, spacing: DS.Spacing.md) {
+                    Image(systemName: hasCheckedInToday ? "checkmark.circle.fill" : "plus.circle.fill")
+                        .font(.system(size: 24, weight: .semibold))
+                        .foregroundStyle(hasCheckedInToday ? DS.ColorToken.mint : DS.ColorToken.purpleLight)
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(hasCheckedInToday ? "Checked In Today" : "Tap to Check In for Today")
+                            .font(DS.FontToken.rounded(18, .bold))
+                            .foregroundStyle(DS.ColorToken.textPrimary)
+                        
+                        if !hasCheckedInToday && daysToNextMilestone > 0 {
+                            Text("\(daysToNextMilestone) Days to \(milestoneTitle)")
+                                .font(DS.FontToken.rounded(13, .medium))
+                                .foregroundStyle(DS.ColorToken.purpleDark)
+                        } else if hasCheckedInToday {
+                            Text(milestoneDescription)
+                                .font(DS.FontToken.rounded(13))
+                                .foregroundStyle(DS.ColorToken.textSecondary)
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .padding(DS.Spacing.lg)
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(PlainButtonStyle())
+            .disabled(hasCheckedInToday)
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .opacity(isPressed ? 0.9 : 1.0)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !hasCheckedInToday {
+                            isPressed = true
+                        }
+                    }
+                    .onEnded { _ in
+                        isPressed = false
+                    }
+            )
+            .accessibilityLabel(hasCheckedInToday ? "Checked in today" : "Check in today")
+            .accessibilityHint(!hasCheckedInToday && daysToNextMilestone > 0 ? "\(daysToNextMilestone) days until \(milestoneTitle)" : "")
+        }
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.lg)
+                .fill(Color(.systemBackground))
+                .shadow(color: DS.ColorToken.shadow, radius: 8, x: 0, y: 4)
+        )
+    }
+    
+    #if canImport(ActivityKit)
+    @available(iOS 18.0, *)
+    private func updateLiveActivity() {
+        Task { @MainActor in
+            guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+            
+            let attributes = SobrietyActivityAttributes(startDate: store.startDate)
+            let contentState = SobrietyActivityAttributes.ContentState(
+                currentStreak: store.currentStreak,
+                daysToNextMilestone: daysToNextMilestone,
+                milestoneTitle: milestoneTitle
+            )
+            
+            let staleDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+            let activityContent = ActivityContent(state: contentState, staleDate: staleDate)
+            
+            let existingActivities = Activity<SobrietyActivityAttributes>.activities
+            if let existingActivity = existingActivities.first(where: { 
+                Calendar.current.isDate($0.attributes.startDate, inSameDayAs: store.startDate)
+            }) {
+                await existingActivity.update(activityContent)
+            } else {
+                do {
+                    _ = try Activity<SobrietyActivityAttributes>.request(
+                        attributes: attributes,
+                        contentState: contentState,
+                        pushType: nil
+                    )
+                } catch {
+                    print("Failed to start Live Activity: \(error.localizedDescription)")
+                }
             }
         }
     }
+    #endif
 }
+
+// MARK: - Daily Affirmation Card
+struct DailyAffirmationCard: View {
+    @EnvironmentObject var store: SobrietyStore
+    @State private var currentQuote: String = ""
+    
+    private var hasCheckedInToday: Bool {
+        guard let lastCheckIn = store.lastCheckInDate else { return false }
+        return Calendar.current.isDate(lastCheckIn, inSameDayAs: Date())
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            // Main quote
+            Text(currentQuote.isEmpty ? (store.motivationalQuotes.first ?? "You've got this!") : currentQuote)
+                .font(DS.FontToken.rounded(18, .semibold))
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.leading)
+                .lineSpacing(4)
+            
+            // Encouragement message
+            Text("Building momentum!")
+                .font(DS.FontToken.rounded(14))
+                .foregroundStyle(.white.opacity(0.9))
+            
+            // Reflect button (only after check-in)
+            if hasCheckedInToday {
+            HStack {
+                    Button(action: {
+                        // Future: Navigate to reflection/journal view
+                    }) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "heart.fill")
+                                .font(.system(size: 12, weight: .semibold))
+                            Text("Reflect")
+                                .font(DS.FontToken.rounded(13, .medium))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, DS.Spacing.md)
+                        .padding(.vertical, DS.Spacing.xs)
+                        .background(
+                            Capsule()
+                                .fill(.white.opacity(0.2))
+                        )
+                    }
+                    
+                    Spacer()
+                    
+                    Text("Keep up the great work today!")
+                        .font(DS.FontToken.rounded(12))
+                        .foregroundStyle(.white.opacity(0.8))
+                }
+                .padding(.top, DS.Spacing.xs)
+            }
+        }
+        .padding(DS.Spacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: DS.Radius.lg)
+                .fill(DS.ColorToken.purpleGradient)
+                .shadow(color: DS.ColorToken.shadow, radius: 8, x: 0, y: 4)
+        )
+        .onAppear {
+            // Select a daily quote based on current date for consistency
+            let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+            let quoteIndex = dayOfYear % store.motivationalQuotes.count
+            currentQuote = store.motivationalQuotes[quoteIndex]
+        }
+        .onChange(of: store.currentStreak) { _, _ in
+            // Update quote when streak changes (new day)
+            let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+            let quoteIndex = dayOfYear % store.motivationalQuotes.count
+            currentQuote = store.motivationalQuotes[quoteIndex]
+        }
+    }
+}
+
 
 // MARK: - Mini Calendar View
 struct MiniCalendarView: View {
     @EnvironmentObject var store: SobrietyStore
     @Binding var currentDate: Date
     @Binding var isExpanded: Bool
-    @State private var showingCloseButton = true
     
     private let calendar = Calendar.current
     private var dateFormatter: DateFormatter {
@@ -207,7 +388,7 @@ struct MiniCalendarView: View {
     }
     
     var body: some View {
-        VStack(spacing: DS.Spacing.sm) {
+        VStack(spacing: DS.Spacing.md) {
             // Month header with close button
             HStack {
                 Button(action: {
@@ -278,9 +459,9 @@ struct MiniCalendarView: View {
             HStack {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(DS.ColorToken.mint)
-                    .font(.system(size: 13))
+                    .font(.system(size: 14))
                 Text("\(checkedInDaysThisMonth) day\(checkedInDaysThisMonth == 1 ? "" : "s") checked in this month")
-                    .font(DS.FontToken.rounded(12, .medium))
+                    .font(DS.FontToken.rounded(13, .medium))
                     .foregroundStyle(DS.ColorToken.textSecondary)
                 Spacer()
             }
@@ -292,7 +473,7 @@ struct MiniCalendarView: View {
                 .fill(Color(.systemBackground))
                 .shadow(color: DS.ColorToken.shadow, radius: 6, x: 0, y: 3)
         )
-        .padding(.top, DS.Spacing.xs)
+        .padding(.top, DS.Spacing.sm)
     }
 }
 
@@ -356,159 +537,25 @@ struct MiniCalendarDayView: View {
     }
 }
 
-// MARK: - Merged Check-In and Milestone Card
-struct CheckInMilestoneCard: View {
-    @EnvironmentObject var store: SobrietyStore
-    @State private var isPressed = false
-    
-    private var hasCheckedInToday: Bool {
-        guard let lastCheckIn = store.lastCheckInDate else { return false }
-        return Calendar.current.isDate(lastCheckIn, inSameDayAs: Date())
-    }
-    
-    private var daysToNextMilestone: Int {
-        guard let milestone = store.currentMilestone else { return 0 }
-        return milestone.days - store.currentStreak
-    }
-    
-    private var milestoneTitle: String {
-        store.currentMilestone?.title ?? "Milestone"
-    }
-    
-    private var milestoneDescription: String {
-        store.currentMilestone?.description ?? "Keep going!"
-    }
-    
-    var body: some View {
-        Button(action: {
-            if !hasCheckedInToday {
-                let generator = UIImpactFeedbackGenerator(style: .medium)
-                generator.impactOccurred()
-                store.checkIn()
-                
-                // Update Live Activity if available
-                #if canImport(ActivityKit)
-                if #available(iOS 18.0, *) {
-                    updateLiveActivity()
-                }
-                #endif
-            }
-        }) {
-            VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-                HStack {
-                    Image(systemName: hasCheckedInToday ? "checkmark.circle.fill" : "circle")
-                        .font(.system(size: 20, weight: .semibold))
-                        .foregroundStyle(hasCheckedInToday ? DS.ColorToken.mint : DS.ColorToken.purpleLight)
-                    
-                    Text(hasCheckedInToday ? "Checked In Today" : "Check In Today")
-                        .font(DS.FontToken.rounded(17, .bold))
-                        .foregroundStyle(DS.ColorToken.textPrimary)
-                    
-                    if !hasCheckedInToday {
-                        Spacer()
-                        if daysToNextMilestone > 0 {
-                            Text("• \(daysToNextMilestone) Days to \(milestoneTitle)")
-                                .font(DS.FontToken.rounded(14, .medium))
-                                .foregroundStyle(DS.ColorToken.purpleDark)
-                        }
-                    }
-                }
-                
-                if daysToNextMilestone > 0 {
-                    Text(milestoneDescription)
-                        .font(DS.FontToken.rounded(14))
-                        .foregroundStyle(DS.ColorToken.textSecondary)
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(DS.Spacing.md)
-            .background(
-                RoundedRectangle(cornerRadius: DS.Radius.lg)
-                    .fill(
-                        hasCheckedInToday ?
-                            LinearGradient(
-                                colors: [DS.ColorToken.mint.opacity(0.15), DS.ColorToken.mint.opacity(0.25)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ) :
-                            LinearGradient(
-                                colors: [DS.ColorToken.purpleLight.opacity(0.1), DS.ColorToken.purpleDark.opacity(0.15)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: DS.Radius.lg)
-                            .stroke(
-                                hasCheckedInToday ? DS.ColorToken.mint.opacity(0.3) : DS.ColorToken.purpleLight.opacity(0.3),
-                                lineWidth: 1.5
-                            )
-                    )
-            )
-            .scaleEffect(isPressed ? 0.98 : 1.0)
-            .opacity(isPressed ? 0.9 : 1.0)
-        }
-        .buttonStyle(PlainButtonStyle())
-        .disabled(hasCheckedInToday)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    if !hasCheckedInToday {
-                        isPressed = true
-                    }
-                }
-                .onEnded { _ in
-                    isPressed = false
-                }
-        )
-        .accessibilityLabel(hasCheckedInToday ? "Checked in today" : "Check in today")
-        .accessibilityHint(daysToNextMilestone > 0 ? "\(daysToNextMilestone) days until \(milestoneTitle)" : "")
-    }
-    
-    #if canImport(ActivityKit)
-    @available(iOS 18.0, *)
-    private func updateLiveActivity() {
-        Task { @MainActor in
-            guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-            
-            let attributes = SobrietyActivityAttributes(startDate: store.startDate)
-            let contentState = SobrietyActivityAttributes.ContentState(
-                currentStreak: store.currentStreak,
-                daysToNextMilestone: daysToNextMilestone,
-                milestoneTitle: milestoneTitle
-            )
-            
-            let staleDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
-            let activityContent = ActivityContent(state: contentState, staleDate: staleDate)
-            
-            // Check if activity already exists
-            let existingActivities = Activity<SobrietyActivityAttributes>.activities
-            if let existingActivity = existingActivities.first(where: { 
-                Calendar.current.isDate($0.attributes.startDate, inSameDayAs: store.startDate)
-            }) {
-                await existingActivity.update(activityContent)
-            } else {
-                // Start new activity
-                do {
-                    _ = try Activity<SobrietyActivityAttributes>.request(
-                        attributes: attributes,
-                        contentState: contentState,
-                        pushType: nil
-                    )
-                } catch {
-                    print("Failed to start Live Activity: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-    #endif
-}
 
 // MARK: - Main Dashboard View
 struct SobrietyDashboard: View {
     @EnvironmentObject var store: SobrietyStore
     @Binding var selectedTab: Int
     @State private var shimmerOffset: CGFloat = -200
+    @State private var isCalendarExpanded = false
+    @State private var currentCalendarDate = Date()
+    
+    // Calculate calendar height for offset - minimized for compact layout
+    private var calendarHeight: CGFloat {
+        // Reduced by 30 points - very tight spacing
+        // Affirmation card sits very close to calendar
+        return 10
+    }
+    
+    private var contentOffset: CGFloat {
+        isCalendarExpanded ? calendarHeight : 0
+    }
     
     var body: some View {
         GeometryReader { geometry in
@@ -525,23 +572,39 @@ struct SobrietyDashboard: View {
                         .padding(.top, geometry.safeAreaInsets.top > 0 ? DS.Spacing.xs : DS.Spacing.sm)
                         .padding(.bottom, DS.Spacing.sm)
                     
-                    // Main content area - compact spacing
-                    VStack(spacing: DS.Spacing.sm) {
-                        // Compact streak visualization
-                        CompactStreakView()
-                            .padding(.horizontal, DS.Spacing.lg)
-                        
-                        // Merged check-in and milestone card
-                        CheckInMilestoneCard()
-                            .padding(.horizontal, DS.Spacing.lg)
-                        
-                        Spacer(minLength: 0)
-                        
-                        // Need Help button - positioned above tab bar
-                        needHelpButton
-                            .padding(.horizontal, DS.Spacing.lg)
-                            .padding(.bottom, 8) // Space above tab bar
+                    // Unified Daily Action Hub
+                    DailyActionHub(isCalendarExpanded: $isCalendarExpanded)
+                        .padding(.horizontal, DS.Spacing.lg)
+                        .padding(.bottom, DS.Spacing.sm)
+                    
+                    // Calendar view (expands below hub)
+                    if isCalendarExpanded {
+                        MiniCalendarView(
+                            currentDate: $currentCalendarDate,
+                            isExpanded: $isCalendarExpanded
+                        )
+                        .padding(.horizontal, DS.Spacing.lg)
+                        .padding(.bottom, DS.Spacing.sm)
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .move(edge: .top)),
+                            removal: .opacity.combined(with: .move(edge: .top))
+                        ))
                     }
+                    
+                    // Content group that slides down (Affirmation card)
+                    VStack(spacing: 0) {
+                        DailyAffirmationCard()
+                            .padding(.horizontal, DS.Spacing.lg)
+                            .padding(.top, isCalendarExpanded ? 0 : 0)
+                        
+                        if !isCalendarExpanded {
+                            Spacer(minLength: 0)
+                        } else {
+                            // No extra spacing when calendar is expanded - content sits right below calendar
+                        }
+                    }
+                    .offset(y: contentOffset)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.8), value: isCalendarExpanded)
                 }
             }
         }
@@ -589,28 +652,6 @@ struct SobrietyDashboard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private var needHelpButton: some View {
-        NavigationLink(destination: CrisisResourcesView()) {
-            HStack {
-                Image(systemName: "heart.fill")
-                    .foregroundStyle(.white)
-                    .font(.system(size: 16, weight: .semibold))
-                Text("Need Help?")
-                    .font(DS.FontToken.rounded(16, .semibold))
-                    .foregroundStyle(.white)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(.white)
-                    .font(.system(size: 12, weight: .semibold))
-            }
-            .padding(.horizontal, DS.Spacing.md)
-            .padding(.vertical, 12)
-            .frame(minHeight: 44)
-            .background(DS.ColorToken.purpleGradient)
-            .cornerRadius(DS.Radius.lg)
-        }
-        .accessibilityLabel("Open crisis resources")
-    }
 }
 
 // MARK: - Preview with Mock Data
