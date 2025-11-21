@@ -61,7 +61,7 @@ struct Milestone: Identifiable, Codable {
 }
 
 // MARK: - Habit Models
-struct Habit: Identifiable, Codable {
+struct Habit: Identifiable, Codable, Equatable {
     var id = UUID()
     let name: String
     let category: HabitCategory

@@ -3,23 +3,40 @@ import SwiftUI
 // Colors tuned for a Hinge-like, warm, soft UI.
 public enum DS {
     public enum ColorToken {
-        public static let creamBG = Color(hex: "#FFF6E9")
+        public static let creamBG = Color(hex: "#FDFAF6")  // Updated to match design spec
         public static let card = Color.white
         public static let textPrimary = Color(hex: "#1E1E1E")
         public static let textSecondary = Color(hex: "#6B6B6B")
         public static let tint = Color(hex: "#9B5FFF")      // mid-point purple for fallback
-        public static let mint = Color(hex: "#8EE3D0")
+        public static let mint = Color(hex: "#4DB6AC")      // Updated teal to match design spec
         public static let peach = Color(hex: "#FFC6A8")
         public static let shadow = Color.black.opacity(0.08)
         public static let divider = Color.black.opacity(0.06)
+        public static let purple300 = Color(hex: "#BA68C8")  // New purple for buttons
+        public static let odysseyTeal = Color(hex: "#E8F5E9")  // Odyssey gradient bottom color
         
         // Purple gradient colors
-        public static let purpleLight = Color(hex: "#B47AFF")  // light purple
+        public static let purpleLight = Color(hex: "#BA68C8")  // Updated to match design spec
         public static let purpleDark = Color(hex: "#7B2FFF")   // deep purple
         public static let purpleGradient = LinearGradient(
             colors: [purpleLight, purpleDark],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
+        )
+        
+        // Odyssey gradient (Recovery Odyssey theme)
+        public static let odysseyGradient = LinearGradient(
+            colors: [Color(hex: "#FDFAF6"), odysseyTeal],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        
+        // Holographic overlay for futuristic effect
+        public static let holographicOverlay = RadialGradient(
+            colors: [purple300.opacity(0.1), Color.clear],
+            center: .center,
+            startRadius: 0,
+            endRadius: 300
         )
         
         // Orange sherbet gradient colors

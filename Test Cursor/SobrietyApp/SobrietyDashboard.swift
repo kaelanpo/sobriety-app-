@@ -171,8 +171,10 @@ struct DailyActionHub: View {
             // Zone 2: Daily Check-In (Main Body) - Most prominent
             Button(action: {
                 if !hasCheckedInToday {
+                    #if os(iOS)
                     let generator = UIImpactFeedbackGenerator(style: .medium)
                     generator.impactOccurred()
+                    #endif
                     store.checkIn()
                     
                     #if canImport(ActivityKit)
@@ -337,7 +339,7 @@ struct DailyAffirmationCard: View {
             let quoteIndex = dayOfYear % store.motivationalQuotes.count
             currentQuote = store.motivationalQuotes[quoteIndex]
         }
-        .onChange(of: store.currentStreak) { _, _ in
+        .onChange(of: store.currentStreak) { _ in
             // Update quote when streak changes (new day)
             let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
             let quoteIndex = dayOfYear % store.motivationalQuotes.count
@@ -674,7 +676,7 @@ extension SobrietyStore {
 #Preview("iPhone SE") {
     let mockStore = SobrietyStore.mockStore()
     
-    return NavigationView {
+    NavigationView {
         SobrietyDashboard(selectedTab: .constant(0))
             .environmentObject(mockStore)
     }
@@ -683,7 +685,7 @@ extension SobrietyStore {
 #Preview("iPhone 15 Pro") {
     let mockStore = SobrietyStore.mockStore()
     
-    return NavigationView {
+    NavigationView {
         SobrietyDashboard(selectedTab: .constant(0))
             .environmentObject(mockStore)
     }
@@ -692,7 +694,7 @@ extension SobrietyStore {
 #Preview("iPhone 15 Pro Max") {
     let mockStore = SobrietyStore.mockStore()
     
-    return NavigationView {
+    NavigationView {
         SobrietyDashboard(selectedTab: .constant(0))
             .environmentObject(mockStore)
     }
@@ -701,7 +703,7 @@ extension SobrietyStore {
 #Preview("Dark Mode") {
     let mockStore = SobrietyStore.mockStore()
     
-    return NavigationView {
+    NavigationView {
         SobrietyDashboard(selectedTab: .constant(0))
             .environmentObject(mockStore)
             .preferredColorScheme(.dark)

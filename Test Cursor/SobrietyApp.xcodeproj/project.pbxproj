@@ -16,6 +16,9 @@
 		A1234567890123456789014A /* HabitTrackingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789014B /* HabitTrackingView.swift */; };
 		A1234567890123456789014C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789014D /* SettingsView.swift */; };
 		A1234567890123456789014E /* GamificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789014F /* GamificationView.swift */; };
+		A1234567890123456789015J /* CircularProgressRing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015G /* CircularProgressRing.swift */; };
+		A1234567890123456789015K /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015H /* ToastView.swift */; };
+		A1234567890123456789015L /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015I /* ActionButton.swift */; };
 		A1234567890123456789015A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015B /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -29,6 +32,9 @@
 		A1234567890123456789014B /* HabitTrackingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitTrackingView.swift; sourceTree = "<group>"; };
 		A1234567890123456789014D /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A1234567890123456789014F /* GamificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamificationView.swift; sourceTree = "<group>"; };
+		A1234567890123456789015G /* CircularProgressRing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularProgressRing.swift; sourceTree = "<group>"; };
+		A1234567890123456789015H /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		A1234567890123456789015I /* ActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionButton.swift; sourceTree = "<group>"; };
 		A1234567890123456789015B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A1234567890123456789015C /* SobrietyApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SobrietyApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -64,6 +70,9 @@
 				A1234567890123456789014B /* HabitTrackingView.swift */,
 				A1234567890123456789014D /* SettingsView.swift */,
 				A1234567890123456789014F /* GamificationView.swift */,
+				A1234567890123456789015G /* CircularProgressRing.swift */,
+				A1234567890123456789015H /* ToastView.swift */,
+				A1234567890123456789015I /* ActionButton.swift */,
 				A1234567890123456789015B /* Assets.xcassets */,
 			);
 			path = SobrietyApp;
@@ -154,6 +163,9 @@
 				A1234567890123456789014A /* HabitTrackingView.swift in Sources */,
 				A1234567890123456789014C /* SettingsView.swift in Sources */,
 				A1234567890123456789014E /* GamificationView.swift in Sources */,
+				A1234567890123456789015J /* CircularProgressRing.swift in Sources */,
+				A1234567890123456789015K /* ToastView.swift in Sources */,
+				A1234567890123456789015L /* ActionButton.swift in Sources */,
 				A1234567890123456789012A /* Test_CursorApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
